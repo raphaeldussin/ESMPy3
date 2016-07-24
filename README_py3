@@ -1,0 +1,4 @@
+* Ported to python3 using 2to3 script
+* path to ESMFMKFILE put into $HOME/.esmpyrc ressource configuration file
+
+Raphael Dussin, Earth System Modeling group, Rutgers, July 2016
