@@ -117,7 +117,9 @@ class OptionalBool(object):
 class Py3Char(object):
     @classmethod
     def from_param(self, param):
-        if isinstance(param, bytes):
+        if param is None:
+            return None
+        elif isinstance(param, bytes):
             return param
         else:
             return param.encode('utf-8')
