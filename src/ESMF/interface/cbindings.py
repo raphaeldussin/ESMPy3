@@ -114,6 +114,14 @@ class OptionalBool(object):
                 paramptr = ptr(ct.c_bool(param))
                 return paramptr
 
+class Py3Char(object):
+    @classmethod
+    def from_param(self, param):
+        if isinstance(param, bytes):
+            return param
+        else:
+            return param.encode('utf-8')
+
 
 #### INIT/FINAL ###################################################
 
@@ -396,7 +404,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     return gridstruct
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
-_ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
+_ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
                                           OptionalNamedConstant,
@@ -404,7 +412,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           OptionalArrayOfStrings,
                                           ct.POINTER(ct.c_int)]
 @deprecated
@@ -705,7 +713,7 @@ def ESMP_GridGetItem(grid, item, staggerloc=constants.StaggerLoc.CENTER):
     return gridItemPtr
 
 _ESMF.ESMC_GridWrite.restype = ct.c_int
-_ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,ct.c_char_p]
+_ESMF.ESMC_GridWrite.argtypes = [ct.c_void_p, ct.c_uint,Py3Char]
 @deprecated
 def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
     """
@@ -852,12 +860,12 @@ def ESMP_MeshCreate(parametricDim, spatialDim, coordSys=None):
     return mesh
 
 _ESMF.ESMC_MeshCreateFromFile.restype = ESMP_Mesh
-_ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
+_ESMF.ESMC_MeshCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           OptionalNamedConstant,
-                                          ct.c_char_p]
+                                          Py3Char]
 @deprecated
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
@@ -1115,7 +1123,7 @@ def ESMP_MeshGetOwnedNodeCount(mesh):
     return nodeCount
 
 _ESMF.ESMC_MeshWrite.restype = ct.c_int
-_ESMF.ESMC_MeshWrite.argtypes = [ct.c_void_p, ct.c_char_p]
+_ESMF.ESMC_MeshWrite.argtypes = [ct.c_void_p, Py3Char]
 @deprecated
 def ESMP_MeshWrite(mesh, filename):
     """
@@ -1205,7 +1213,7 @@ def ESMP_LocStreamGetBounds(locstream, localDe=0):
     return exLB, exUB
 
 _ESMF.ESMC_LocStreamAddKeyAlloc.restype = ct.c_int
-_ESMF.ESMC_LocStreamAddKeyAlloc.argtypes = [ct.c_void_p, ct.c_char_p,
+_ESMF.ESMC_LocStreamAddKeyAlloc.argtypes = [ct.c_void_p, Py3Char,
                                             OptionalNamedConstant]
 def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
     """
@@ -1224,6 +1232,8 @@ def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
 
     """
 
+    keyName = keyName.encode('utf-8')
+
     rc = _ESMF.ESMC_LocStreamAddKeyAlloc(locstream.ptr, keyName, keyTypeKind)
 
     if rc != constants._ESMP_SUCCESS:
@@ -1232,7 +1242,7 @@ def ESMP_LocStreamAddKeyAlloc(locstream, keyName, keyTypeKind=None):
 
 _ESMF.ESMC_LocStreamGetKeyPtr.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_LocStreamGetKeyPtr.argtypes = [ct.c_void_p,
-                                          ct.c_char_p,
+                                          Py3Char,
                                           ct.c_int,
                                           ct.POINTER(ct.c_int)]
 def ESMP_LocStreamGetKeyPtr(locstream, keyName, localDe=0):
@@ -1278,7 +1288,7 @@ _ESMF.ESMC_FieldCreateGridTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                ct.c_uint, OptionalStructPointer,
                                                OptionalStructPointer, 
                                                OptionalStructPointer,
-                                               ct.c_char_p, 
+                                               Py3Char,
                                                ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_FieldCreateGrid(grid, name=None,
@@ -1364,7 +1374,7 @@ _ESMF.ESMC_FieldCreateLocStreamTypeKind.argtypes = [ct.c_void_p,
                                                     OptionalStructPointer,
                                                     OptionalStructPointer,
                                                     OptionalStructPointer,
-                                                    ct.c_char_p,
+                                                    Py3Char,
                                                     ct.POINTER(ct.c_int)]
 def ESMP_FieldCreateLocStream(locstream, name=None,
                      typekind=constants.TypeKind.R8,
@@ -1431,7 +1441,7 @@ _ESMF.ESMC_FieldCreateMeshTypeKind.argtypes = [ct.c_void_p, ct.c_uint,
                                                OptionalStructPointer,
                                                OptionalStructPointer,
                                                OptionalStructPointer,
-                                               ct.c_char_p,
+                                               Py3Char,
                                                ct.POINTER(ct.c_int)]
 def ESMP_FieldCreateMesh(mesh, name=None,
                      typekind=constants.TypeKind.R8,
@@ -1588,8 +1598,8 @@ def ESMP_FieldPrint(field):
 
 _ESMF.ESMC_FieldRead.restype = ct.c_int
 _ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
-                                 ct.c_char_p,
-                                 ct.c_char_p,
+                                 Py3Char,
+                                 Py3Char,
                                  ct.c_uint,
                                  ct.c_uint]
 def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
@@ -1782,7 +1792,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 
 
 _ESMF.ESMC_ScripInq.restype = None
-_ESMF.ESMC_ScripInq.argtypes = [ct.c_char_p, 
+_ESMF.ESMC_ScripInq.argtypes = [Py3Char,
                                 np.ctypeslib.ndpointer(dtype=np.int32), 
                                 ct.POINTER(ct.c_int),
                                 ct.POINTER(ct.c_int)]
@@ -1809,7 +1819,7 @@ def ESMP_ScripInq(filename):
     return rank, grid_dims
 
 _ESMF.ESMC_GridspecInq.restype = None
-_ESMF.ESMC_GridspecInq.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32), 
+_ESMF.ESMC_GridspecInq.argtypes = [Py3Char, ct.POINTER(ct.c_int), np.ctypeslib.ndpointer(dtype=np.int32),
                                    ct.POINTER(ct.c_int)]
 @netcdf
 def ESMP_GridspecInq(filename):
